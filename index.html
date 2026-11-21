@@ -1,0 +1,900 @@
+<!doctype html>
+<html lang="ca">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Missió Ciència 2n ESO</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚡</text></svg>">
+<style>
+:root{
+  --bg:#0b1020; --bg2:#121a33; --card:#18223f; --card2:#1f2b50; --line:#2c3a66;
+  --tx:#e8ecff; --mut:#9aa6d1; --acc:#7c9cff; --ok:#34d399; --bad:#f87171; --gold:#facc15;
+  --pos:#ef4444; --neg:#3b82f6;
+}
+*{box-sizing:border-box}
+html{font-size:20px}
+html,body{margin:0}
+body{background:radial-gradient(circle at 20% 0%,#1b2550 0%,var(--bg) 55%) fixed;color:var(--tx);
+  font-family:Verdana,"Segoe UI",Tahoma,system-ui,sans-serif;min-height:100vh;line-height:1.6}
+button{font:inherit;cursor:pointer;border:0;border-radius:12px}
+input{font:inherit}
+.wrap{max-width:1000px;margin:0 auto;padding:16px}
+header{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:space-between;padding:10px 16px;
+  background:rgba(18,26,51,.85);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5;backdrop-filter:blur(6px)}
+.logo{font-weight:800;font-size:1.25rem;letter-spacing:.3px;cursor:pointer}
+.logo span{color:var(--gold)}
+.hstats{display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:.92rem}
+.pill{background:var(--card);border:1px solid var(--line);padding:4px 10px;border-radius:999px;white-space:nowrap}
+.iconbtn{background:var(--card);border:1px solid var(--line);color:var(--tx);padding:4px 10px;border-radius:999px}
+h1{font-size:1.6rem;margin:.4em 0 .2em}
+h2{font-size:1.25rem;margin:.6em 0 .4em}
+.sub{color:var(--mut);margin:0 0 16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(15em,1fr));gap:14px}
+.world{background:linear-gradient(160deg,var(--card2),var(--card));border:1px solid var(--line);border-radius:18px;padding:16px;
+  display:flex;flex-direction:column;gap:8px;position:relative;overflow:hidden;transition:transform .15s}
+.world:hover{transform:translateY(-3px)}
+.world .ico{font-size:2.2rem}
+.world .nm{font-weight:700;font-size:1.1rem}
+.world .ds{color:var(--mut);font-size:.9rem;flex:1}
+.world .stars{font-size:1.2rem;letter-spacing:2px}
+.world .row{display:flex;gap:8px;flex-wrap:wrap}
+.world.locked{opacity:.6}
+.world .bar{position:absolute;left:0;top:0;bottom:0;width:6px}
+.btn{background:var(--acc);color:#0b1020;font-weight:700;padding:10px 16px}
+.btn:hover{filter:brightness(1.1)}
+.btn.ghost{background:transparent;color:var(--tx);border:1px solid var(--line)}
+.btn.ok{background:var(--ok)}
+.btn.gold{background:var(--gold)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.rank{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px 16px;margin:6px 0 18px;display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.rank .big{font-size:2rem}
+.xpbar{height:10px;background:var(--bg);border-radius:99px;overflow:hidden;min-width:180px;flex:1}
+.xpbar div{height:100%;background:linear-gradient(90deg,var(--acc),var(--gold))}
+/* game */
+.qtop{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin:6px 0 8px}
+.hearts{font-size:1.2rem;letter-spacing:2px}
+.progress{height:8px;background:var(--card);border-radius:99px;overflow:hidden;margin-bottom:14px}
+.progress div{height:100%;background:var(--acc);transition:width .3s}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px}
+.tag{display:inline-block;font-size:.9rem;padding:2px 8px;border-radius:99px;background:var(--bg2);border:1px solid var(--line);color:var(--mut);margin-bottom:8px}
+.qtext{font-size:1.15rem;margin-bottom:14px}
+.opts{display:grid;gap:10px}
+.opt{background:var(--card2);color:var(--tx);border:2px solid var(--line);padding:12px 14px;text-align:left;font-size:1rem}
+.opt:hover:not(:disabled){border-color:var(--acc)}
+.opt.right{border-color:var(--ok);background:rgba(52,211,153,.15)}
+.opt.wrong{border-color:var(--bad);background:rgba(248,113,113,.12);text-decoration:line-through}
+.numrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.numrow input{background:var(--bg);color:var(--tx);border:2px solid var(--line);border-radius:12px;padding:10px 12px;font-size:1.1rem;width:12em;max-width:100%}
+.numrow input:focus{outline:none;border-color:var(--acc)}
+.help{color:var(--mut);font-size:.95rem;margin-top:6px}
+.hintbox{margin-top:14px;display:grid;gap:8px}
+.hint{background:rgba(250,204,21,.1);border:1px dashed var(--gold);border-radius:12px;padding:8px 12px;font-size:1rem}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px;align-items:center}
+.fb{margin-top:14px;border-radius:12px;padding:12px 14px;display:none}
+.fb.ok{display:block;background:rgba(52,211,153,.12);border:1px solid var(--ok)}
+.fb.bad{display:block;background:rgba(248,113,113,.1);border:1px solid var(--bad)}
+.fb.info{display:block;background:rgba(124,156,255,.1);border:1px solid var(--acc)}
+.fb .t{font-weight:700;margin-bottom:4px}
+/* builder */
+.chain{display:flex;align-items:center;flex-wrap:wrap;gap:6px;min-height:70px;background:var(--bg);border:2px dashed var(--line);border-radius:14px;padding:10px}
+.frac{display:inline-flex;flex-direction:column;align-items:center;font-weight:600;padding:4px 8px;border-radius:10px;background:var(--card2);border:1px solid var(--line);min-width:64px}
+.frac>span:first-child{border-bottom:2px solid var(--tx);padding:0 4px 2px}
+.frac>span:last-child{padding:2px 4px 0}
+.frac.start{background:#2a2350;border-color:#6d5bd0}
+button.frac{color:var(--tx);font-size:1rem}
+button.frac:hover{border-color:var(--acc)}
+.chain button.frac:hover{border-color:var(--bad)}
+.pool{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.x{color:var(--mut);font-weight:700}
+.cut{text-decoration:line-through;text-decoration-color:var(--bad);text-decoration-thickness:2px;opacity:.6}
+.unitstat{margin-top:10px;font-size:1rem}
+/* modal */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;align-items:flex-start;justify-content:center;padding:24px 12px;z-index:20;overflow:auto}
+.modal .box{background:var(--bg2);border:1px solid var(--line);border-radius:18px;max-width:900px;width:100%;padding:20px}
+.formula{background:var(--bg);border-left:4px solid var(--gold);padding:8px 12px;border-radius:8px;margin:8px 0;font-family:Consolas,monospace;font-size:1.05rem}
+.theory p,.theory li{font-size:1rem}
+.theory ul{padding-left:20px}
+.sim{background:var(--bg);border-radius:14px;padding:10px;margin-top:10px;text-align:center}
+.sim svg{width:100%;max-width:420px;height:auto}
+.sim .row{display:flex;gap:10px;justify-content:center;align-items:center;flex-wrap:wrap}
+.center{text-align:center}
+.bigstars{font-size:3rem;letter-spacing:6px;margin:8px 0}
+.confetti{position:fixed;top:-40px;font-size:24px;pointer-events:none;animation:fall linear forwards;z-index:30}
+@keyframes fall{to{transform:translateY(110vh) rotate(540deg)}}
+.shake{animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.fig{margin:16px 0;background:var(--bg);border:1px solid var(--line);border-radius:16px;padding:14px;text-align:center}
+.fig svg{width:100%;max-width:620px;height:auto;display:block;margin:0 auto}
+.fig figcaption{margin-top:10px;font-size:1rem;text-align:left}
+.fsbtn{font-weight:800;min-width:2.4em}
+footer{color:var(--mut);font-size:.9rem;text-align:center;padding:24px 16px}
+footer button{background:none;color:var(--mut);text-decoration:underline;padding:0}
+@media (max-width:560px){ h1{font-size:1.35rem} .wrap{padding:12px 16px} }
+</style>
+</head>
+<body>
+<header>
+  <div class="logo" onclick="goHome()">⚡ Missió <span>Ciència</span></div>
+  <div class="hstats">
+    <span class="pill" id="hName">👩‍🔬</span>
+    <span class="pill" id="hXp">0 XP</span>
+    <button class="iconbtn fsbtn" onclick="fontSize(-2)" title="Lletra més petita" aria-label="Lletra més petita">A−</button>
+    <button class="iconbtn fsbtn" onclick="fontSize(2)" title="Lletra més gran" aria-label="Lletra més gran" style="font-size:1.15em">A+</button>
+    <button class="iconbtn" id="hSound" onclick="toggleSound()">🔊</button>
+  </div>
+</header>
+<main class="wrap" id="app"></main>
+<footer>
+  Fet per practicar Física i Química de 2n d'ESO · Progrés desat en aquest navegador ·
+  <button onclick="resetAll()">Reiniciar progrés</button>
+</footer>
+<div id="modal"></div>
+
+<script>
+/* ===================== UTILITATS ===================== */
+const E = 1.6e-19, K = 9e9, C = 3e8;
+const rnd = a => a[Math.floor(Math.random()*a.length)];
+const shuffle = a => { a=[...a]; for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];} return a; };
+const SUP = {'-':'⁻','0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹'};
+const SUPR = Object.fromEntries(Object.entries(SUP).map(([a,b])=>[b,a]));
+const sup = n => String(n).split('').map(c=>SUP[c]||c).join('');
+function dec(x,d=3){ return String(+(+x).toFixed(d)).replace('.',','); }
+function fmt(x){
+  if(x===0) return '0';
+  const ax=Math.abs(x);
+  if(ax>=1e5 || ax<1e-3){
+    let e=Math.floor(Math.log10(ax)); let m=x/Math.pow(10,e);
+    m=+m.toFixed(2); if(Math.abs(m)>=10){m/=10;e++;}
+    const ms = m===1 ? '' : (m===-1 ? '−' : dec(m,2).replace('-','−')+' · ');
+    return ms+'10'+sup(e);
+  }
+  return dec(+x.toPrecision(4),3).replace('-','−');
+}
+function fmtT(v){ if(v>=1e4 && Number.isInteger(Math.log10(v))) return '10'+sup(Math.log10(v)); return dec(v); }
+function parseNum(raw){
+  let s=String(raw).trim().replace(/\s/g,'').replace(/[−–]/g,'-');
+  if(!s) return NaN;
+  s=s.replace(/[⁻⁰¹²³⁴⁵⁶⁷⁸⁹]+/g, m=>'^'+m.split('').map(c=>SUPR[c]).join(''));
+  s=s.replace(/\^\^/g,'^');
+  // punt com a separador de milers (3.600) si no hi ha coma
+  if(!s.includes(',') && /^[+-]?\d{1,3}(\.\d{3})+$/.test(s)) s=s.replace(/\./g,'');
+  s=s.replace(/,/g,'.');
+  if(/^[+-]?(\d+\.?\d*|\.\d+)(e[+-]?\d+)?$/i.test(s)) return parseFloat(s);
+  let m=s.match(/^([+-]?(?:\d+\.?\d*|\.\d+))[x×·*]10\^?\(?([+-]?\d+)\)?$/i);
+  if(m) return parseFloat(m[1])*Math.pow(10,+m[2]);
+  m=s.match(/^([+-]?)10\^\(?([+-]?\d+)\)?$/);
+  if(m) return (m[1]==='-'?-1:1)*Math.pow(10,+m[2]);
+  return NaN;
+}
+
+/* ===================== PREGUNTES TIPUS TEST ===================== */
+/* La primera opció és sempre la correcta (després es barregen). */
+const MC_CARREGA = [
+ {q:"Quina partícula de l'àtom té càrrega elèctrica <b>negativa</b>?", o:["L'electró","El protó","El neutró","El nucli"],
+  h:["No és dins del nucli: es mou al seu voltant.","És la partícula que passa d'un cos a un altre quan els freguem."],
+  e:"L'electró té càrrega negativa (−1,6·10⁻¹⁹ C). El protó és positiu i el neutró no té càrrega."},
+ {q:"Un cos que <b>guanya</b> electrons queda carregat…", o:["Negativament","Positivament","No es carrega","Depèn de la seva massa"],
+  h:["Els electrons són negatius.","Si afegeixes càrregues negatives, quin signe sobra?"],
+  e:"Si guanya electrons, té més electrons que protons → càrrega negativa."},
+ {q:"Un cos que <b>perd</b> electrons queda carregat…", o:["Positivament","Negativament","No es carrega","Depèn de la temperatura"],
+  h:["Els protons es queden al nucli, no es mouen.","Si marxen càrregues negatives, quines en sobren?"],
+  e:"Si perd electrons, hi ha més protons que electrons → càrrega positiva."},
+ {q:"Quina és la unitat de càrrega elèctrica al Sistema Internacional?", o:["El coulomb (C)","El newton (N)","El volt (V)","El joule (J)"],
+  h:["Porta el nom del físic francès Charles-Augustin de …","El seu símbol és la lletra C."],
+  e:"La càrrega es mesura en coulombs (C). Com que 1 C és molt gran, sovint es fan servir µC (10⁻⁶ C) i nC (10⁻⁹ C)."},
+ {q:"Un àtom és elèctricament <b>neutre</b> quan…", o:["Té el mateix nombre de protons que d'electrons","No té electrons","Té més neutrons que protons","Té el mateix nombre de neutrons que d'electrons"],
+  h:["Els neutrons no tenen càrrega, així que no compten.","Les càrregues + i − s'han de compensar."],
+  e:"Si hi ha tants protons (+) com electrons (−), les càrregues es compensen i l'àtom és neutre."},
+ {q:"Freguem un globus amb el cabell i després s'enganxa a la paret. Quin tipus d'electrització s'ha produït en fregar-lo?", o:["Per fregament","Per contacte","Per inducció","Per fusió"],
+  h:["Fixa't en el verb de la pregunta.","Quan dos materials es freguen, els electrons passen d'un a l'altre."],
+  e:"És electrització per fregament: en fregar, uns electrons passen del cabell al globus."},
+ {q:"Quines partícules passen d'un cos a l'altre quan s'electritzen?", o:["Els electrons","Els protons","Els neutrons","Els nuclis sencers"],
+  h:["Els protons estan molt ben lligats dins del nucli.","Són les partícules més lleugeres i externes de l'àtom."],
+  e:"Només es mouen els electrons. Els protons es queden al nucli."},
+ {q:"Quin d'aquests materials és un bon <b>conductor</b> elèctric?", o:["El coure","El plàstic","El vidre","La fusta"],
+  h:["Els cables elèctrics porten aquest material per dins.","És un metall de color vermellós."],
+  e:"Els metalls com el coure són conductors: els electrons s'hi mouen fàcilment. Plàstic, vidre i fusta són aïllants."},
+ {q:"Acostem una vareta carregada a un objecte <b>sense tocar-lo</b> i les seves càrregues es redistribueixen. Com s'anomena?", o:["Electrització per inducció","Electrització per fregament","Electrització per contacte","Fissió"],
+  h:["No hi ha contacte ni fregament.","La paraula vol dir «provocar a distància»."],
+  e:"És la inducció: les càrregues de l'objecte es reorganitzen per l'atracció o repulsió de la vareta, sense tocar-se."},
+ {q:"Quin valor té la càrrega d'un electró?", o:["−1,6 · 10⁻¹⁹ C","−1 C","+1,6 · 10⁻¹⁹ C","−9 · 10⁹ C"],
+  h:["És negativa.","És un nombre molt, molt petit."],
+  e:"La càrrega de l'electró és −1,6·10⁻¹⁹ C. El protó té la mateixa quantitat però positiva."},
+ {q:"La càrrega elèctrica es <b>conserva</b>. Si el globus guanya 1000 electrons en fregar-lo amb el cabell, el cabell…", o:["N'ha perdut 1000","N'ha guanyat 1000","No canvia","Els electrons es destrueixen"],
+  h:["Els electrons no apareixen del no-res.","D'on han sortit els electrons del globus?"],
+  e:"La càrrega no es crea ni es destrueix: els 1000 electrons del globus venen del cabell, que queda positiu."},
+];
+
+const MC_FORCES = [
+ {q:"Què passa entre dues càrregues <b>positives</b>?", o:["Es repel·leixen","S'atrauen","No interaccionen","Depèn de la seva massa"],
+  h:["Recorda la regla: iguals…","Càrregues del mateix signe s'allunyen."],
+  e:"Càrregues del mateix signe es repel·leixen; de signe contrari s'atrauen."},
+ {q:"Què passa entre una càrrega <b>positiva</b> i una de <b>negativa</b>?", o:["S'atrauen","Es repel·leixen","No interaccionen","Es destrueixen"],
+  h:["Recorda la regla: contraris…","Com els pols diferents de dos imants."],
+  e:"Càrregues de signe contrari s'atrauen."},
+ {q:"Si la distància entre dues càrregues es fa el <b>doble</b>, la força…", o:["Es divideix entre 4","Es divideix entre 2","Es duplica","No canvia"],
+  h:["A la llei de Coulomb la distància està elevada al quadrat.","2² = 4, i la distància està dividint."],
+  e:"F = k·q₁·q₂/d². Si d es fa el doble, d² es fa 4 vegades més gran, i la força es divideix entre 4."},
+ {q:"Si dupliquem el valor d'<b>una</b> de les càrregues, la força…", o:["Es duplica","Es quadruplica","Es divideix entre 2","No canvia"],
+  h:["Les càrregues estan multiplicant a la fórmula.","No estan elevades al quadrat."],
+  e:"La força és proporcional a q₁·q₂: si una es duplica, la força també es duplica."},
+ {q:"Quina llei descriu la força entre dues càrregues elèctriques?", o:["La llei de Coulomb","La llei de la gravitació de Newton","La llei de Hooke","La llei de Lavoisier"],
+  h:["Té el mateix nom que la unitat de càrrega.","F = k · q₁ · q₂ / d²"],
+  e:"La llei de Coulomb: F = k·q₁·q₂/d²."},
+ {q:"Quin valor té la constant <b>k</b> de la llei de Coulomb (al buit o a l'aire)?", o:["9 · 10⁹ N·m²/C²","6,67 · 10⁻¹¹ N·m²/kg²","1,6 · 10⁻¹⁹ C","3 · 10⁸ m/s"],
+  h:["És un nombre molt gran.","Comença per 9."],
+  e:"k = 9·10⁹ N·m²/C². (6,67·10⁻¹¹ és la constant de la gravitació, 1,6·10⁻¹⁹ C la càrrega de l'electró i 3·10⁸ m/s la velocitat de la llum.)"},
+ {q:"En què es diferencia la força elèctrica de la força gravitatòria?", o:["L'elèctrica pot atreure o repel·lir; la gravitatòria només atrau","Totes dues només atrauen","L'elèctrica no depèn de la distància","La gravitatòria pot repel·lir"],
+  h:["Hi ha dos tipus de càrrega, però només un tipus de massa.","Has vist mai una massa que repel·leixi una altra massa?"],
+  e:"Com que hi ha càrregues + i −, la força elèctrica pot ser atractiva o repulsiva. La gravitatòria sempre és atractiva."},
+ {q:"En quina unitat es mesura la força elèctrica?", o:["El newton (N)","El coulomb (C)","El metre (m)","El watt (W)"],
+  h:["És la mateixa unitat que qualsevol altra força.","Porta el nom de qui va estudiar la gravetat i la poma."],
+  e:"Totes les forces es mesuren en newtons (N)."},
+ {q:"Per fer servir la llei de Coulomb, en quines unitats han d'anar la càrrega i la distància?", o:["Coulombs (C) i metres (m)","Microcoulombs (µC) i centímetres (cm)","Coulombs (C) i quilòmetres (km)","Newtons (N) i metres (m)"],
+  h:["Cal fer servir les unitats del Sistema Internacional.","Per això necessitem els factors de conversió!"],
+  e:"Sempre en unitats del SI: càrrega en C i distància en m. Si et donen µC o cm, primer els has de convertir."},
+];
+
+const MC_NUCLEAR = [
+ {q:"Què és la <b>fissió</b> nuclear?", o:["Un nucli pesant es divideix en dos nuclis més petits","Dos nuclis lleugers s'uneixen","Un electró canvia d'òrbita","Una combustió química"],
+  h:["«Fissura» vol dir trencadura.","Passa a l'urani de les centrals nuclears."],
+  e:"A la fissió, un nucli pesant (com l'urani-235) es trenca en dos de més petits i allibera molta energia i neutrons."},
+ {q:"Què és la <b>fusió</b> nuclear?", o:["Dos nuclis lleugers s'uneixen per formar-ne un de més pesant","Un nucli pesant es divideix","Un sòlid es converteix en líquid","Un àtom perd electrons"],
+  h:["«Fusionar» vol dir ajuntar.","Passa amb l'hidrogen a dins de les estrelles."],
+  e:"A la fusió, nuclis lleugers (com els d'hidrogen) s'uneixen i formen heli, alliberant moltíssima energia."},
+ {q:"On es produeix la fusió nuclear de manera natural?", o:["Al Sol i a les estrelles","A la central d'Ascó","Als volcans","En els llamps"],
+  h:["Necessita temperatures de milions de graus.","Ens arriba en forma de llum i calor cada dia."],
+  e:"El Sol obté la seva energia fusionant hidrogen en heli. Les centrals nuclears actuals fan servir la fissió."},
+ {q:"Quin és el combustible més habitual de les centrals nuclears?", o:["L'urani-235","El carbó","El petroli","El gas natural"],
+  h:["És un element molt pesant, amb 92 protons.","El seu nom ve del planeta Urà."],
+  e:"Les centrals nuclears fan servir urani enriquit en urani-235, que es divideix fàcilment per fissió."},
+ {q:"Quina partícula xoca contra el nucli d'urani per iniciar la fissió?", o:["Un neutró","Un electró","Un protó","Un fotó de llum"],
+  h:["No té càrrega, i per això el nucli no la repel·leix.","És una de les partícules que formen el nucli."],
+  e:"Un neutró impacta contra l'urani-235, que es trenca i allibera 2 o 3 neutrons nous."},
+ {q:"Què és una <b>reacció en cadena</b>?", o:["Els neutrons alliberats en una fissió provoquen noves fissions","Una sèrie de combustions de carbó","Electrons que salten d'àtom en àtom","Una reacció que només passa una vegada"],
+  h:["Cada fissió allibera 2 o 3 neutrons.","Què fan aquests neutrons nous?"],
+  e:"Els neutrons que surten d'una fissió xoquen amb altres nuclis i els fan dividir: la reacció es multiplica. A les centrals es controla amb barres de control."},
+ {q:"Quines centrals nuclears hi ha a Catalunya?", o:["Ascó i Vandellòs","Almaraz i Trillo","Flix i Tortosa","Cofrents i Garoña"],
+  h:["Totes dues són a la província de Tarragona.","Una és a la Ribera d'Ebre i l'altra al Baix Camp."],
+  e:"A Catalunya hi ha les centrals d'Ascó (Ribera d'Ebre) i Vandellòs (Baix Camp)."},
+ {q:"Quines partícules formen el <b>nucli</b> de l'àtom?", o:["Protons i neutrons","Protons i electrons","Només electrons","Neutrons i electrons"],
+  h:["Els electrons són a l'escorça, fora del nucli.","Una partícula és positiva i l'altra neutra."],
+  e:"El nucli conté protons (+) i neutrons (sense càrrega). Els electrons giren al voltant."},
+ {q:"Quin és un <b>avantatge</b> de l'energia nuclear?", o:["No emet CO₂ mentre produeix electricitat","No genera cap residu","És una energia renovable","No té cap risc"],
+  h:["Pensa en el canvi climàtic.","Les altres tres opcions són falses."],
+  e:"No emet gasos d'efecte hivernacle mentre funciona i produeix molta energia amb poc combustible. Però no és renovable i genera residus."},
+ {q:"Quin és un dels principals <b>inconvenients</b> de l'energia nuclear?", o:["Genera residus radioactius que duren milers d'anys","Emet molt CO₂","Produeix molt poca energia","Només funciona quan fa vent"],
+  h:["Té a veure amb què passa amb el combustible gastat.","Aquests residus s'han de guardar en llocs especials."],
+  e:"Els residus radioactius són perillosos durant milers d'anys. També hi ha risc d'accidents (com Txernòbil o Fukushima)."},
+ {q:"Els protons del nucli es repel·leixen (són positius). Quina força els manté units?", o:["La força nuclear forta","La força elèctrica","La força gravitatòria","La força magnètica"],
+  h:["Ha de ser més forta que la repulsió elèctrica.","Només actua a distàncies molt petites, dins del nucli."],
+  e:"La força nuclear forta és la més intensa de la natura, però només actua dins del nucli. Supera la repulsió elèctrica entre protons."},
+ {q:"Quina radiació és la <b>més penetrant</b>?", o:["La radiació gamma (γ)","La radiació alfa (α)","La radiació beta (β)","Totes són iguals"],
+  h:["L'alfa s'atura amb un full de paper.","Per aturar-la cal un mur gruixut de plom o formigó."],
+  e:"Alfa: s'atura amb paper. Beta: amb una làmina d'alumini. Gamma: cal plom o formigó gruixut."},
+ {q:"El <b>nombre atòmic (Z)</b> d'un element indica…", o:["El nombre de protons","El nombre de neutrons","Protons + neutrons","El nombre d'àtoms"],
+  h:["Cada element té un Z diferent i el defineix.","El nombre màssic (A) és el que compta protons + neutrons."],
+  e:"Z = nombre de protons. A = protons + neutrons. Per tant, neutrons = A − Z."},
+ {q:"Segons Einstein (E = m·c²), d'on surt l'energia nuclear?", o:["Una petita part de la massa es transforma en energia","De cremar l'urani amb oxigen","Dels electrons que es mouen","De la calor del sol"],
+  h:["La c és la velocitat de la llum: un nombre enorme.","Després de la reacció, els productes pesen una mica menys."],
+  e:"Els productes de la fissió tenen una mica menys de massa. Aquesta massa «perduda» es converteix en molta energia: E = m·c²."},
+];
+
+const MC_CONV = [
+ {q:"Un factor de conversió és una fracció que val…", o:["1","0","10","Depèn de les unitats"],
+  h:["El numerador i el denominador expressen la mateixa quantitat.","1000 m i 1 km són el mateix: 1000 m / 1 km = ?"],
+  e:"Un factor de conversió val 1 perquè dalt i baix hi ha la mateixa quantitat amb unitats diferents. Per això multiplicar-hi no canvia el valor, només les unitats."},
+ {q:"Per passar de <b>km a m</b>, quin factor de conversió fas servir?", o:["1000 m / 1 km","1 km / 1000 m","100 m / 1 km","1 m / 1000 km"],
+  h:["Els km han de quedar a baix per poder-se simplificar.","1 km = 1000 m."],
+  e:"Multipliquem per (1000 m / 1 km): els km es simplifiquen i queden metres."},
+ {q:"1 µC (microcoulomb) equival a…", o:["10⁻⁶ C","10⁻³ C","10⁶ C","10⁻⁹ C"],
+  h:["Micro vol dir una milionèsima.","Un milió és 10⁶."],
+  e:"micro (µ) = 10⁻⁶. Per tant, 1 µC = 10⁻⁶ C = 0,000001 C."},
+ {q:"1 nC (nanocoulomb) equival a…", o:["10⁻⁹ C","10⁻⁶ C","10⁻³ C","10⁹ C"],
+  h:["Nano és encara més petit que micro.","Una milmilionèsima."],
+  e:"nano (n) = 10⁻⁹. Per tant, 1 nC = 10⁻⁹ C."},
+ {q:"Quants segons té una hora?", o:["3600 s","60 s","360 s","6000 s"],
+  h:["Una hora té 60 minuts.","60 · 60 = ?"],
+  e:"1 h = 60 min = 60 · 60 s = 3600 s."},
+ {q:"Quin prefix vol dir <b>1000 vegades més gran</b>?", o:["quilo (k)","mili (m)","micro (µ)","centi (c)"],
+  h:["El fas servir per a les distàncies llargues.","1 km = 1000 m"],
+  e:"quilo = 10³ = 1000. mili = 10⁻³, centi = 10⁻², micro = 10⁻⁶."},
+ {q:"Una drecera per passar de <b>km/h a m/s</b> és…", o:["Dividir entre 3,6","Multiplicar per 3,6","Dividir entre 1000","Multiplicar per 60"],
+  h:["1000 m / 3600 s = ?","Els m/s sempre donen un número més petit que els km/h."],
+  e:"km/h → m/s: (1000/3600) = 1/3,6, per tant es divideix entre 3,6. I de m/s a km/h es multiplica per 3,6."},
+ {q:"Com s'escriu <b>0,00052</b> en notació científica?", o:["5,2 · 10⁻⁴","5,2 · 10⁴","52 · 10⁻⁵","0,52 · 10⁻³"],
+  h:["Davant de la potència hi ha d'haver un número entre 1 i 10.","Compta quantes posicions mous la coma cap a la dreta."],
+  e:"Movem la coma 4 posicions a la dreta → 5,2 · 10⁻⁴. (52·10⁻⁵ val el mateix, però no és notació científica correcta.)"},
+ {q:"Com s'escriu <b>45 000 000</b> en notació científica?", o:["4,5 · 10⁷","45 · 10⁶","4,5 · 10⁶","4,5 · 10⁻⁷"],
+  h:["El número de davant ha d'estar entre 1 i 10.","Compta quantes xifres hi ha després del 4."],
+  e:"45 000 000 = 4,5 · 10⁷ (movem la coma 7 posicions a l'esquerra)."},
+];
+
+/* ===================== PREGUNTES GENERADES (valors aleatoris) ===================== */
+const GEN_CARREGA = [
+ () => { const a=rnd([2,3,4,5,6,8]), b=rnd([10,11,12,13]), n=a*Math.pow(10,b), gain=Math.random()<.5, Q=(gain?-1:1)*n*E;
+   return {type:'num', tag:'🧮 Càlcul', text:`Un cos neutre <b>${gain?'guanya':'perd'}</b> ${fmt(n)} electrons. Quina càrrega elèctrica té? <br><small>(en coulombs i <b>amb el signe</b>)</small>`,
+   answer:Q, unit:'C', signMatters:true,
+   hints:["Cada electró té una càrrega de 1,6 · 10⁻¹⁹ C (negativa).",
+     gain?"Si guanya electrons, sobren càrregues negatives → el resultat porta signe <b>−</b>.":"Si perd electrons, sobren protons → el resultat porta signe <b>+</b>.",
+     `Q = n · e = ${fmt(n)} · 1,6 · 10⁻¹⁹ C. Multiplica els números i suma els exponents.`],
+   explain:`Q = ${gain?'−':'+'} ${fmt(n)} · 1,6·10⁻¹⁹ C = <b>${fmt(Q)} C</b>`}; },
+ () => { const q=rnd([0.8,1.6,3.2,4.8,8,16]), pos=Math.random()<.5, n=q*1e-6/E;
+   return {type:'num', tag:'🧮 Càlcul', text:`Un objecte té una càrrega de <b>${pos?'+':'−'}${dec(q)} µC</b>. Quants electrons ha <b>${pos?'perdut':'guanyat'}</b>?`,
+   answer:n, unit:'electrons',
+   hints:["Primer passa els µC a C: 1 µC = 10⁻⁶ C.", `${dec(q)} µC = ${fmt(q*1e-6)} C`, "Nombre d'electrons: n = Q / e = Q / 1,6·10⁻¹⁹ C"],
+   explain:`${dec(q)} µC = ${fmt(q*1e-6)} C → n = ${fmt(q*1e-6)} / 1,6·10⁻¹⁹ = <b>${fmt(n)} electrons</b>`}; },
+ () => { const p=rnd([10,12,15,17,20,26]), d=rnd([-3,-2,-1,0,1,2,3]), el=p+d;
+   const o=["Positiva","Negativa","Neutra"]; const ans = d<0?"Positiva":(d>0?"Negativa":"Neutra");
+   return {type:'mc', tag:'🔍 Raona', text:`Un ió té <b>${p} protons</b> i <b>${el} electrons</b>. Quina càrrega té?`,
+   options:o, answer:ans,
+   hints:["Compara el nombre de càrregues + (protons) amb el de − (electrons).","Si sobren electrons és negatiu; si en falten, positiu."],
+   explain:`Té ${p} protons i ${el} electrons: ${d===0?'estan compensats, és neutre.':(d<0?`li falten ${-d} electrons → és <b>positiu</b>.`:`li sobren ${d} electrons → és <b>negatiu</b>.`)}`}; },
+];
+
+const GEN_FORCES = [
+ () => { const q1=rnd([1,2,3,4,5,6]), q2=rnd([1,2,3,4,5]), d=rnd([0.1,0.2,0.3,0.5,0.6,1]), cm=Math.random()<.45;
+   const F=K*q1*1e-6*q2*1e-6/(d*d); const s1=rnd(['+','−']), s2=rnd(['+','−']);
+   const dTxt = cm ? `${dec(d*100)} cm` : `${dec(d)} m`;
+   return {type:'num', tag:'🧮 Llei de Coulomb', text:`Dues càrregues de <b>${s1}${q1} µC</b> i <b>${s2}${q2} µC</b> estan separades <b>${dTxt}</b>. Quin és el valor de la força entre elles? <small>(en N, sense signe)</small>`,
+   answer:F, unit:'N',
+   hints:["Llei de Coulomb: F = k · q₁ · q₂ / d², amb k = 9·10⁹ N·m²/C².",
+     cm ? `Compte! Tot en unitats del SI: ${q1} µC = ${fmt(q1*1e-6)} C, ${q2} µC = ${fmt(q2*1e-6)} C i ${dTxt} = ${dec(d)} m.` : `Passa les càrregues a coulombs: ${q1} µC = ${fmt(q1*1e-6)} C i ${q2} µC = ${fmt(q2*1e-6)} C.`,
+     `F = 9·10⁹ · ${fmt(q1*1e-6)} · ${fmt(q2*1e-6)} / (${dec(d)})² = 9·10⁹ · ${fmt(q1*q2*1e-12)} / ${dec(d*d,4)}`],
+   explain:`F = 9·10⁹ · ${fmt(q1*1e-6)} · ${fmt(q2*1e-6)} / (${dec(d)} m)² = <b>${fmt(F)} N</b>. Com que són de signe ${s1===s2?'igual, es <b>repel·leixen</b>':'contrari, s\'<b>atrauen</b>'}.`}; },
+ () => { const F0=rnd([8,12,18,36,72,90]);
+   const sc=rnd([
+     {t:"la distància entre elles es fa el <b>doble</b>", m:1/4, h:"La distància està al quadrat i dividint: 2² = 4."},
+     {t:"la distància entre elles es fa el <b>triple</b>", m:1/9, h:"La distància està al quadrat i dividint: 3² = 9."},
+     {t:"la distància es redueix a la <b>meitat</b>", m:4, h:"Si d es fa la meitat, d² es fa 4 vegades més petit… i com que divideix, la força es multiplica per 4."},
+     {t:"una de les càrregues es fa el <b>doble</b>", m:2, h:"Les càrregues multipliquen a la fórmula i no estan al quadrat."},
+     {t:"una càrrega es fa el <b>doble</b> i l'altra el <b>triple</b>", m:6, h:"Cada càrrega multiplica: 2 · 3 = ?"},
+     {t:"les <b>dues</b> càrregues es fan el doble", m:4, h:"Cada càrrega multiplica per 2: 2 · 2 = ?"}]);
+   const F=F0*sc.m;
+   return {type:'num', tag:'🔍 Raona', text:`Dues càrregues es fan una força de <b>${F0} N</b>. Si ${sc.t}, quina serà la nova força? <small>(en N)</small>`,
+   answer:F, unit:'N',
+   hints:["Mira la fórmula: F = k · q₁ · q₂ / d².", sc.h],
+   explain:`La força queda multiplicada per ${sc.m<1?'1/'+dec(1/sc.m):dec(sc.m)}: ${F0} N → <b>${fmt(F)} N</b>.`}; },
+ () => { const s1=rnd(['+','−']), s2=rnd(['+','−']), a=rnd([1,2,3,5]), b=rnd([2,4,6]);
+   const same=s1===s2;
+   return {type:'mc', tag:'🔍 Raona', text:`Una càrrega de <b>${s1}${a} µC</b> és a prop d'una altra de <b>${s2}${b} nC</b>. Què passa?`,
+   options:["S'atrauen","Es repel·leixen","No es fan força"], answer: same?"Es repel·leixen":"S'atrauen",
+   hints:["El valor i les unitats no importen per saber si s'atrauen: mira només els signes.","Iguals es repel·leixen, contraris s'atrauen."],
+   explain:`Els signes són ${s1} i ${s2}: ${same?'iguals → es <b>repel·leixen</b>.':'contraris → s\'<b>atrauen</b>.'}`}; },
+];
+
+const ISOTOPS=[["carboni-12",6,12],["carboni-14",6,14],["oxigen-16",8,16],["urani-235",92,235],["urani-238",92,238],["heli-4",2,4],
+ ["ferro-56",26,56],["cobalt-60",27,60],["triti (hidrogen-3)",1,3],["plutoni-239",94,239],["iode-131",53,131],["sodi-23",11,23]];
+const GEN_NUCLEAR = [
+ () => { const [n,Z,A]=rnd(ISOTOPS);
+   return {type:'num', tag:'🧮 Càlcul', text:`L'àtom de <b>${n}</b> té <b>Z = ${Z}</b> (${Z} protons). Quants <b>neutrons</b> té el seu nucli?`,
+   answer:A-Z, unit:'neutrons',
+   hints:["El número que acompanya el nom és el nombre màssic A = protons + neutrons.", `A = ${A}. Neutrons = A − Z`],
+   explain:`Neutrons = A − Z = ${A} − ${Z} = <b>${A-Z}</b>`}; },
+ () => { const [n,Z,A]=rnd(ISOTOPS); const N=A-Z;
+   return {type:'num', tag:'🧮 Càlcul', text:`Un nucli de <b>${n.split('-')[0].split(' ')[0]}</b> té <b>${Z} protons</b> i <b>${N} neutrons</b>. Quin és el seu nombre màssic (A)?`,
+   answer:A, unit:'',
+   hints:["El nombre màssic compta totes les partícules del nucli.","A = protons + neutrons"],
+   explain:`A = Z + N = ${Z} + ${N} = <b>${A}</b>`}; },
+ () => { const g=rnd([1,2,5,10,0.5]); const m=g/1000, En=m*C*C;
+   return {type:'num', tag:'⭐ Repte E = m·c²', text:`En una reacció nuclear, <b>${dec(g)} g</b> de massa es transformen en energia. Quanta energia s'allibera? <small>(en J; c = 3·10⁸ m/s)</small>`,
+   answer:En, unit:'J',
+   hints:["Fórmula d'Einstein: E = m · c².", `La massa ha d'anar en kg: ${dec(g)} g = ${fmt(m)} kg.`, "c² = (3·10⁸)² = 9·10¹⁶ m²/s²"],
+   explain:`E = ${fmt(m)} kg · (3·10⁸ m/s)² = ${fmt(m)} · 9·10¹⁶ = <b>${fmt(En)} J</b>. Una quantitat de massa petitíssima dona moltíssima energia!`}; },
+];
+
+/* ===================== CONSTRUCTOR DE FACTORS DE CONVERSIÓ ===================== */
+const BUILD = [
+ {v:[36,54,72,90,108,18], from:{km:1,h:-1}, fl:'km/h', to:{m:1,s:-1}, tl:'m/s', f:x=>x/3.6, tiles:[[1000,'m',1,'km'],[1,'h',3600,'s']], extra:[[1,'min',60,'s']]},
+ {v:[10,15,20,25,30,5], from:{m:1,s:-1}, fl:'m/s', to:{km:1,h:-1}, tl:'km/h', f:x=>x*3.6, tiles:[[1,'km',1000,'m'],[3600,'s',1,'h']], extra:[[100,'cm',1,'m']]},
+ {v:[2,3,1.5,0.5,4], from:{h:1}, fl:'h', to:{s:1}, tl:'s', f:x=>x*3600, tiles:[[60,'min',1,'h'],[60,'s',1,'min']], extra:[]},
+ {v:[2,5,12,0.5,3], from:{min:1}, fl:'min', to:{s:1}, tl:'s', f:x=>x*60, tiles:[[60,'s',1,'min']], extra:[[1,'h',60,'min']]},
+ {v:[2.5,4,7.2,0.3,12], from:{km:1}, fl:'km', to:{m:1}, tl:'m', f:x=>x*1000, tiles:[[1000,'m',1,'km']], extra:[[100,'cm',1,'m']]},
+ {v:[250,450,1200,75,3000], from:{g:1}, fl:'g', to:{kg:1}, tl:'kg', f:x=>x/1000, tiles:[[1,'kg',1000,'g']], extra:[[1000,'mg',1,'g']]},
+ {v:[2,5,8,3.2,4.8], from:{'µC':1}, fl:'µC', to:{C:1}, tl:'C', f:x=>x*1e-6, tiles:[[1,'C',1e6,'µC']], extra:[[1000,'nC',1,'µC']]},
+ {v:[3,5,12,40,1.6], from:{nC:1}, fl:'nC', to:{C:1}, tl:'C', f:x=>x*1e-9, tiles:[[1,'C',1e9,'nC']], extra:[[1,'µC',1000,'nC']]},
+ {v:[1.5,2,0.75,0.33], from:{L:1}, fl:'L', to:{mL:1}, tl:'mL', f:x=>x*1000, tiles:[[1000,'mL',1,'L']], extra:[]},
+ {v:[30,45,120,5,250], from:{cm:1}, fl:'cm', to:{m:1}, tl:'m', f:x=>x/100, tiles:[[1,'m',100,'cm']], extra:[[1000,'m',1,'km']]},
+];
+const mkTile = t => ({tv:t[0],tu:t[1],bv:t[2],bu:t[3]});
+const tileTxt = t => `(${fmtT(t.tv)} ${t.tu} / ${fmtT(t.bv)} ${t.bu})`;
+function genBuild(def){
+  def = def || rnd(BUILD);
+  const v=rnd(def.v), good=def.tiles.map(mkTile);
+  const inv=good.map(t=>({tv:t.bv,tu:t.bu,bv:t.tv,bu:t.tu}));
+  const pool=shuffle([...good,...inv,...def.extra.map(mkTile)]).map((t,i)=>({...t,id:i}));
+  const ans=def.f(v);
+  return {type:'build', tag:'🔧 Constructor de factors', text:`Converteix <b>${dec(v)} ${def.fl}</b> a <b>${def.tl}</b>. Clica els factors de conversió correctes per posar-los a la cadena!`,
+    start:{v, units:{...def.from}}, target:def.to, tl:def.tl, pool, chain:[], answer:ans, unit:def.tl,
+    hints:["Tria factors on la unitat que vols eliminar quedi a l'altra banda de la fracció (si és a dalt, ha d'anar a baix) per poder-la simplificar.",
+      `Necessites ${good.length===1?'aquest factor':'aquests factors'}: ${good.map(tileTxt).join(' i ')}`,
+      `Calcula: ${dec(v)} ${good.map(t=>`· ${fmtT(t.tv)} / ${fmtT(t.bv)}`).join(' ')}`],
+    explain:`${dec(v)} ${def.fl} ${good.map(t=>'· '+tileTxt(t)).join(' ')} = <b>${fmt(ans)} ${def.tl}</b>`};
+}
+
+/* ===================== IL·LUSTRACIONS D'EXEMPLE ===================== */
+const fig = (svg, cap) => `<figure class="fig">${svg}<figcaption>${cap}</figcaption></figure>`;
+const ball = (x,y,r,col,sign,fs) => `<circle cx="${x}" cy="${y}" r="${r}" fill="${col}"/><text x="${x}" y="${y+fs*0.35}" text-anchor="middle" font-size="${fs}" font-weight="700" fill="#fff">${sign}</text>`;
+const AR = `<defs><marker id="arw" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#facc15"/></marker></defs>`;
+const arrow = (x1,y1,x2,y2,w=4) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#facc15" stroke-width="${w}" marker-end="url(#arw)"/>`;
+const T = (x,y,t,fs=20,col='#e8ecff',anc='middle',fw=600) => `<text x="${x}" y="${y}" font-size="${fs}" fill="${col}" text-anchor="${anc}" font-weight="${fw}">${t}</text>`;
+const FIG = {
+ atom: fig(`<svg viewBox="0 0 480 300" role="img" aria-label="Dibuix d'un àtom">
+   <g fill="none" stroke="#7c9cff" stroke-width="3">
+    <ellipse cx="170" cy="150" rx="140" ry="52"/><ellipse cx="170" cy="150" rx="140" ry="52" transform="rotate(60 170 150)"/><ellipse cx="170" cy="150" rx="140" ry="52" transform="rotate(-60 170 150)"/></g>
+   ${ball(158,140,15,'#ef4444','+',22)}${ball(184,142,15,'#94a3b8','',22)}${ball(160,166,15,'#94a3b8','',22)}${ball(184,166,15,'#ef4444','+',22)}${ball(171,121,15,'#ef4444','+',22)}${ball(146,155,15,'#94a3b8','',22)}${ball(197,154,15,'#94a3b8','',22)}
+   ${ball(30,150,15,'#3b82f6','−',24)}${ball(240,271,15,'#3b82f6','−',24)}${ball(240,29,15,'#3b82f6','−',24)}
+   ${ball(345,80,15,'#ef4444','+',22)}${T(370,88,'Protó',22,'#e8ecff','start')}
+   ${ball(345,150,15,'#94a3b8','',22)}${T(370,158,'Neutró',22,'#e8ecff','start')}
+   ${ball(345,220,15,'#3b82f6','−',24)}${T(370,228,'Electró',22,'#e8ecff','start')}</svg>`,
+   "Un àtom de liti: 3 protons (+) i 4 neutrons al nucli, i 3 electrons (−) al voltant. Com que té 3 + i 3 −, és <b>neutre</b>."),
+ balloon: fig(`<svg viewBox="0 0 480 300" role="img" aria-label="Globus fregat amb el cabell">${AR}
+   <circle cx="110" cy="185" r="62" fill="#f1c27d"/>
+   <path d="M48,170 C40,95 180,85 172,170 C160,130 140,120 110,118 C80,120 60,130 48,170 Z" fill="#7c4a1e"/>
+   <circle cx="90" cy="190" r="6" fill="#1f2937"/><circle cx="130" cy="190" r="6" fill="#1f2937"/><path d="M92,215 Q110,228 128,215" stroke="#1f2937" stroke-width="4" fill="none"/>
+   ${T(70,108,'+',30,'#ef4444')}${T(110,96,'+',30,'#ef4444')}${T(150,108,'+',30,'#ef4444')}
+   <ellipse cx="350" cy="125" rx="78" ry="95" fill="#c084fc"/><path d="M350,220 l-8,12 h16 z" fill="#c084fc"/>
+   <path d="M350,232 C330,260 370,270 350,298" stroke="#e8ecff" stroke-width="2" fill="none"/>
+   ${T(318,100,'−',40,'#1e1b4b')}${T(370,85,'−',40,'#1e1b4b')}${T(330,155,'−',40,'#1e1b4b')}${T(382,140,'−',40,'#1e1b4b')}${T(352,195,'−',40,'#1e1b4b')}
+   ${arrow(185,80,262,80)}${T(222,60,'electrons',20,'#facc15')}</svg>`,
+   "Electrització per <b>fregament</b>: en fregar el globus amb el cabell, els electrons passen del cabell al globus. El globus queda <b>negatiu (−)</b> i el cabell <b>positiu (+)</b>."),
+ pairs: fig(`<svg viewBox="0 0 480 300" role="img" aria-label="Atracció i repulsió entre càrregues">${AR}
+   ${T(10,70,'Es repel·leixen',20,'#e8ecff','start')}${ball(250,62,24,'#ef4444','+',30)}${ball(380,62,24,'#ef4444','+',30)}${arrow(250,26,200,26)}${arrow(380,26,430,26)}
+   ${T(10,170,'Es repel·leixen',20,'#e8ecff','start')}${ball(250,162,24,'#3b82f6','−',32)}${ball(380,162,24,'#3b82f6','−',32)}${arrow(250,126,200,126)}${arrow(380,126,430,126)}
+   ${T(10,270,"S'atrauen",20,'#e8ecff','start')}${ball(250,262,24,'#ef4444','+',30)}${ball(380,262,24,'#3b82f6','−',32)}${arrow(250,226,300,226)}${arrow(380,226,330,226)}</svg>`,
+   "Càrregues <b>iguals</b> es repel·leixen (s'allunyen). Càrregues <b>contràries</b> s'atrauen (s'acosten)."),
+ fission: fig(`<svg viewBox="0 0 520 290" role="img" aria-label="Fissió nuclear">${AR}
+   ${ball(42,140,12,'#94a3b8','',16)}${T(42,180,'neutró',18)}${arrow(58,140,100,140)}
+   <circle cx="165" cy="140" r="56" fill="#16a34a"/>${T(165,148,'U-235',22,'#fff')}
+   ${arrow(228,140,270,140,5)}
+   <circle cx="330" cy="80" r="36" fill="#0d9488"/>${T(330,87,'Kr',22,'#fff')}
+   <circle cx="330" cy="205" r="40" fill="#0d9488"/>${T(330,212,'Ba',22,'#fff')}
+   ${ball(450,50,12,'#94a3b8','',16)}${ball(470,140,12,'#94a3b8','',16)}${ball(450,230,12,'#94a3b8','',16)}
+   ${arrow(372,70,432,52,3)}${arrow(380,140,452,140,3)}${arrow(376,215,432,228,3)}
+   ${T(470,110,'3 neutrons',18,'#e8ecff','end')}
+   ${T(165,270,'⚡ + MOLTA ENERGIA',22,'#facc15','start',700)}</svg>`,
+   "<b>Fissió</b>: un neutró xoca amb un nucli d'urani-235, que es trenca en dos nuclis més petits. S'allibera energia i 3 neutrons nous que poden provocar més fissions (<b>reacció en cadena</b>)."),
+ fusion: fig(`<svg viewBox="0 0 520 260" role="img" aria-label="Fusió nuclear">${AR}
+   <circle cx="470" cy="45" r="32" fill="#facc15"/>${T(470,53,'Sol',20,'#1e1b4b')}
+   ${ball(50,120,16,'#ef4444','+',22)}${ball(80,120,16,'#94a3b8','',20)}${T(65,170,'Hidrogen',18)}
+   ${T(130,128,'+',34,'#e8ecff')}
+   ${ball(180,110,16,'#ef4444','+',22)}${ball(210,110,16,'#94a3b8','',20)}${ball(195,136,16,'#94a3b8','',20)}${T(195,180,'Hidrogen',18)}
+   ${arrow(240,122,290,122,5)}
+   ${ball(330,108,16,'#ef4444','+',22)}${ball(360,108,16,'#94a3b8','',20)}${ball(330,136,16,'#94a3b8','',20)}${ball(360,136,16,'#ef4444','+',22)}${T(345,180,'Heli',18)}
+   ${T(400,128,'+',34,'#e8ecff')}${ball(440,122,12,'#94a3b8','',16)}${T(440,160,'neutró',16)}
+   ${T(260,235,'⚡ + MOLTÍSSIMA ENERGIA',22,'#facc15','middle',700)}</svg>`,
+   "<b>Fusió</b>: dos nuclis d'hidrogen s'uneixen i formen un nucli d'heli. És el que passa dins del <b>Sol</b> i les estrelles."),
+ plant: fig(`<svg viewBox="0 0 520 320" role="img" aria-label="Central nuclear">${AR}
+   <line x1="0" y1="250" x2="520" y2="250" stroke="#475569" stroke-width="3"/>
+   <path d="M30,250 V160 A60,60 0 0 1 150,160 V250 Z" fill="#cbd5e1"/>${T(90,215,'Reactor',18,'#1e1b4b')}${T(90,238,'(fissió)',16,'#1e1b4b')}
+   <rect x="200" y="190" width="100" height="60" rx="6" fill="#64748b"/>${T(250,218,'Turbina i',16,'#fff')}${T(250,238,'generador',16,'#fff')}
+   ${arrow(152,205,196,205,3)}${T(174,190,'vapor',15,'#facc15')}
+   <path d="M340,250 C360,200 360,140 350,100 H450 C440,140 440,200 460,250 Z" fill="#e2e8f0"/>
+   <circle cx="380" cy="80" r="22" fill="#f1f5f9" opacity=".9"/><circle cx="410" cy="62" r="28" fill="#f1f5f9" opacity=".9"/><circle cx="440" cy="78" r="20" fill="#f1f5f9" opacity=".9"/>
+   ${T(400,274,'Torre de refrigeració',16)}
+   ${T(260,308,"⚡ Electricitat cap a les cases",18,'#facc15','middle',700)}</svg>`,
+   "Una <b>central nuclear</b> (com Ascó o Vandellòs): la calor de la fissió bull aigua, el vapor fa girar una turbina i el generador produeix electricitat. El «fum» blanc de les torres és només <b>vapor d'aigua</b>."),
+ rays: fig(`<svg viewBox="0 0 520 280" role="img" aria-label="Poder de penetració de les radiacions">${AR}
+   <circle cx="40" cy="150" r="30" fill="#facc15"/>${T(40,160,'☢',30,'#1e1b4b')}
+   <rect x="170" y="40" width="8" height="220" fill="#f8fafc"/>${T(174,30,'Paper',18)}
+   <rect x="290" y="40" width="14" height="220" fill="#94a3b8"/>${T(297,30,'Alumini',18)}
+   <rect x="410" y="40" width="40" height="220" fill="#475569"/>${T(430,30,'Plom',18)}
+   <line x1="75" y1="85" x2="165" y2="85" stroke="#ef4444" stroke-width="6"/>${T(90,75,'α alfa',18,'#ef4444','start')}
+   <line x1="75" y1="150" x2="285" y2="150" stroke="#60a5fa" stroke-width="6"/>${T(90,140,'β beta',18,'#60a5fa','start')}
+   <line x1="75" y1="215" x2="405" y2="215" stroke="#c084fc" stroke-width="6" stroke-dasharray="14 6"/>${T(90,205,'γ gamma',18,'#c084fc','start')}</svg>`,
+   "Poder de penetració: l'<b>alfa</b> s'atura amb un full de paper, la <b>beta</b> amb una làmina d'alumini i la <b>gamma</b> necessita plom o formigó gruixut."),
+ speed: fig(`<svg viewBox="0 0 520 220" role="img" aria-label="72 km/h són 20 m/s">
+   <circle cx="110" cy="110" r="90" fill="#fff" stroke="#dc2626" stroke-width="18"/>${T(110,120,'72',56,'#111','middle',700)}${T(110,160,'km/h',22,'#111')}
+   ${T(276,124,'÷ 3,6 →',26,'#facc15','middle',700)}
+   <rect x="345" y="45" width="160" height="130" rx="16" fill="#1d4ed8"/>${T(425,118,'20',56,'#fff','middle',700)}${T(425,158,'m/s',22,'#fff')}</svg>`,
+   "Un senyal de <b>72 km/h</b> vol dir que el cotxe recorre <b>20 metres cada segon</b>: 72 · (1000 m / 1 km) · (1 h / 3600 s) = 20 m/s."),
+ prefix: fig(`<svg viewBox="0 0 560 200" role="img" aria-label="Escala de prefixos de longitud">${AR}
+   ${[['km',10],['m',170],['cm',330],['mm',470]].map(([u,x])=>`<rect x="${x}" y="70" width="80" height="60" rx="10" fill="#1f2b50" stroke="#7c9cff" stroke-width="3"/>${T(x+40,110,u,26)}`).join('')}
+   ${arrow(95,60,165,60,3)}${T(130,45,'× 1000',18,'#facc15')}${arrow(255,60,325,60,3)}${T(290,45,'× 100',18,'#facc15')}${arrow(415,60,465,60,3)}${T(440,45,'× 10',18,'#facc15')}
+   ${arrow(165,145,95,145,3)}${T(130,175,'÷ 1000',18,'#34d399')}${arrow(325,145,255,145,3)}${T(290,175,'÷ 100',18,'#34d399')}${arrow(465,145,415,145,3)}${T(440,175,'÷ 10',18,'#34d399')}</svg>`,
+   "Cap a una unitat <b>més petita</b>, el número es fa <b>més gran</b> (es multiplica). Cap a una unitat <b>més gran</b>, es divideix. Exemple: 2,5 km = 2500 m."),
+};
+
+/* ===================== MONS ===================== */
+const WORLDS = [
+ {id:'carrega', name:'Càrrega elèctrica', icon:'⚡', color:'#facc15', desc:'Electrons, protons, coulombs i electrització.', mc:MC_CARREGA, gens:GEN_CARREGA, nMC:4, nGen:4,
+  theory:`<h2>⚡ Càrrega elèctrica</h2>
+  <p>La matèria està formada per <b>àtoms</b>. Cada àtom té:</p>
+  <ul><li>Un <b>nucli</b> amb <b>protons</b> (càrrega +) i <b>neutrons</b> (sense càrrega).</li>
+  <li>Una <b>escorça</b> amb <b>electrons</b> (càrrega −) que giren al voltant.</li></ul>
+  ${FIG.atom}
+  <p>Un àtom és <b>neutre</b> si té tants protons com electrons. Quan un cos <b>guanya electrons</b> queda <b>negatiu</b>; si en <b>perd</b>, queda <b>positiu</b>. Només es mouen els electrons!</p>
+  <p><b>Formes d'electritzar un cos:</b> per <b>fregament</b> (globus i cabell), per <b>contacte</b> (tocant un cos carregat) i per <b>inducció</b> (acostant-lo sense tocar).</p>
+  ${FIG.balloon}
+  <p>La càrrega es mesura en <b>coulombs (C)</b>. La càrrega d'un electró és molt petita:</p>
+  <div class="formula">e = 1,6 · 10⁻¹⁹ C</div>
+  <p>Per calcular la càrrega d'un cos que ha guanyat o perdut <i>n</i> electrons:</p>
+  <div class="formula">Q = n · e &nbsp;&nbsp;→&nbsp;&nbsp; n = Q / e</div>
+  <p>💡 Truc amb la calculadora: 1,6·10⁻¹⁹ s'escriu <b>1.6 EXP −19</b> (o ×10ˣ).</p>`},
+ {id:'forces', name:'Forces elèctriques', icon:'🧲', color:'#60a5fa', desc:'Atracció, repulsió i la llei de Coulomb.', mc:MC_FORCES, gens:GEN_FORCES, nMC:4, nGen:4,
+  theory:`<h2>🧲 Forces elèctriques</h2>
+  <p>Les càrregues elèctriques es fan forces entre elles:</p>
+  <ul><li>Càrregues del <b>mateix signe</b> (+ +, − −) es <b>repel·leixen</b>.</li>
+  <li>Càrregues de <b>signe contrari</b> (+ −) s'<b>atrauen</b>.</li></ul>
+  ${FIG.pairs}
+  <p>El valor de la força el dona la <b>llei de Coulomb</b>:</p>
+  <div class="formula">F = k · q₁ · q₂ / d² &nbsp;&nbsp; k = 9 · 10⁹ N·m²/C²</div>
+  <ul><li><b>F</b> en newtons (N), <b>q</b> en coulombs (C), <b>d</b> en metres (m). ⚠️ Si et donen µC o cm, converteix-los primer!</li>
+  <li>Si la distància es fa el <b>doble</b>, la força es fa <b>4 vegades més petita</b> (perquè d està al quadrat).</li>
+  <li>Si una càrrega es fa el doble, la força també es fa el doble.</li></ul>
+  <div class="sim" id="sim">
+    <div class="row">
+      <button class="btn ghost" id="b1">Càrrega 1: +</button>
+      <button class="btn ghost" id="b2">Càrrega 2: −</button>
+    </div>
+    <svg viewBox="0 0 340 130" id="simsvg"></svg>
+    <div class="row"><label>Distància: <input type="range" id="simd" min="1" max="5" value="2"> <b id="simdt"></b></label></div>
+    <div id="simf" style="margin-top:6px"></div>
+    <div class="help">Simulador: dues càrregues de 2 µC. Canvia els signes i la distància i mira què passa amb la força.</div>
+  </div>`},
+ {id:'nuclear', name:'Energia nuclear', icon:'☢️', color:'#34d399', desc:'Fissió, fusió, el nucli i les centrals.', mc:MC_NUCLEAR, gens:GEN_NUCLEAR, nMC:5, nGen:3,
+  theory:`<h2>☢️ Energia nuclear</h2>
+  <p>L'energia nuclear és l'energia que hi ha guardada al <b>nucli</b> dels àtoms. El nucli té protons i neutrons, units per la <b>força nuclear forta</b> (molt més intensa que la repulsió elèctrica entre protons).</p>
+  <div class="formula">Z = nº de protons &nbsp;·&nbsp; A = protons + neutrons &nbsp;·&nbsp; neutrons = A − Z</div>
+  <p><b>Fissió:</b> un neutró xoca contra un nucli pesant (urani-235), que es trenca en dos de més petits i allibera energia i 2-3 neutrons → <b>reacció en cadena</b>. És el que passa a les centrals nuclears (a Catalunya: <b>Ascó</b> i <b>Vandellòs</b>).</p>
+  ${FIG.fission}
+  ${FIG.plant}
+  <p><b>Fusió:</b> dos nuclis lleugers (hidrogen) s'uneixen per formar-ne un de més pesant (heli). És el que passa al <b>Sol</b>.</p>
+  ${FIG.fusion}
+  <p>En les dues, una mica de massa es converteix en molta energia:</p>
+  <div class="formula">E = m · c² &nbsp;&nbsp; c = 3 · 10⁸ m/s</div>
+  <p><b>Radiacions:</b> alfa (s'atura amb paper), beta (alumini), gamma (cal plom o formigó).</p>
+  ${FIG.rays}
+  <p>✅ <b>Avantatges:</b> molta energia, no emet CO₂ mentre funciona. ❌ <b>Inconvenients:</b> residus radioactius durant milers d'anys, risc d'accidents, no és renovable.</p>`},
+ {id:'conversio', name:'Factors de conversió', icon:'🔁', color:'#f472b6', desc:'Canvia d\'unitats com un professional.', mc:MC_CONV, gens:[()=>genBuild()], nMC:3, nGen:5,
+  theory:`<h2>🔁 Factors de conversió</h2>
+  <p>Un <b>factor de conversió</b> és una fracció que val <b>1</b> perquè dalt i baix hi ha la mateixa quantitat en unitats diferents. Per exemple: <b>1000 m / 1 km</b>.</p>
+  <p><b>Com es fa?</b> Escrius la quantitat i la multipliques per factors posant la unitat que vols eliminar a l'<b>altra banda</b> de la fracció, perquè es simplifiqui:</p>
+  <div class="formula">72 km/h · (1000 m / 1 km) · (1 h / 3600 s) = 20 m/s</div>
+  ${FIG.speed}
+  <p><b>Prefixos que has de saber:</b></p>
+  ${FIG.prefix}
+  <ul><li>quilo (k) = 10³ = 1000</li><li>centi (c) = 10⁻² = 0,01</li><li>mili (m) = 10⁻³ = 0,001</li><li>micro (µ) = 10⁻⁶</li><li>nano (n) = 10⁻⁹</li></ul>
+  <p><b>Temps:</b> 1 h = 60 min = 3600 s.</p>
+  <p>💡 Drecera: km/h → m/s divideix entre 3,6; m/s → km/h multiplica per 3,6.</p>`},
+];
+const FINAL = {id:'final', name:'Repte final', icon:'🏆', color:'#a78bfa', desc:'Barreja de tots els temes. Desbloqueja\'l aconseguint almenys 1 ⭐ a cada món.'};
+
+/* ===================== ESTAT I DESAT ===================== */
+const KEY='missioCiencia2eso_v1';
+let S = {name:'', xp:0, stars:{}, best:{}, sound:true, played:0};
+try{ const s=JSON.parse(localStorage.getItem(KEY)); if(s) S={...S,...s}; }catch(e){}
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){} }
+const RANKS=[[0,'🔬','Aprenent d\'electrons'],[600,'⚡','Caçador/a de càrregues'],[1600,'🧲','Domador/a de Coulomb'],[3200,'🔁','Mestre/a de les conversions'],[5500,'☢️','Guardià/ana del nucli'],[9000,'🏆','Científic/a llegendari/ària']];
+function rankOf(xp){ let r=0; RANKS.forEach((x,i)=>{ if(xp>=x[0]) r=i; }); return r; }
+
+/* ===================== SO ===================== */
+let AC=null;
+function beep(kind){
+  if(!S.sound) return;
+  try{
+    AC = AC || new (window.AudioContext||window.webkitAudioContext)();
+    const notes = kind==='ok'?[523,659,784]:kind==='win'?[523,659,784,1047]:kind==='hint'?[880]:[220,170];
+    const t0=AC.currentTime;
+    notes.forEach((f,i)=>{ const o=AC.createOscillator(), g=AC.createGain(); o.type=kind==='bad'?'sawtooth':'triangle';
+      o.frequency.value=f; o.connect(g); g.connect(AC.destination); const t=t0+i*0.1;
+      g.gain.setValueAtTime(0.0001,t); g.gain.exponentialRampToValueAtTime(0.15,t+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t+0.18);
+      o.start(t); o.stop(t+0.2); });
+  }catch(e){}
+}
+function toggleSound(){ S.sound=!S.sound; save(); hdr(); }
+function fontSize(d){ S.fs=Math.min(32,Math.max(16,(S.fs||22)+d)); save(); applyFs(); }
+function applyFs(){ document.documentElement.style.fontSize=(S.fs||22)+'px'; }
+applyFs();
+
+/* ===================== INTERFÍCIE ===================== */
+const app=document.getElementById('app');
+function hdr(){
+  const r=RANKS[rankOf(S.xp)];
+  document.getElementById('hName').textContent = `${r[1]} ${S.name||'Científic/a'}`;
+  document.getElementById('hXp').textContent = `${S.xp} XP`;
+  document.getElementById('hSound').textContent = S.sound?'🔊':'🔇';
+}
+const starStr = n => '★'.repeat(n)+'☆'.repeat(3-n);
+function finalUnlocked(){ return WORLDS.every(w=>(S.stars[w.id]||0)>=1); }
+
+function goHome(){
+  R=null; closeModal(); hdr();
+  if(!S.name) return askName();
+  const ri=rankOf(S.xp), r=RANKS[ri], next=RANKS[ri+1];
+  const pct = next ? Math.round((S.xp-r[0])/(next[0]-r[0])*100) : 100;
+  const card = (w,locked) => `
+    <div class="world ${locked?'locked':''}">
+      <div class="bar" style="background:${w.color}"></div>
+      <div class="ico">${locked?'🔒':w.icon}</div>
+      <div class="nm">${w.name}</div>
+      <div class="ds">${w.desc}</div>
+      <div class="stars" style="color:${w.color}">${starStr(S.stars[w.id]||0)}</div>
+      <div class="help">${S.best[w.id]?'Millor puntuació: '+S.best[w.id]:'Encara no hi has jugat'}</div>
+      <div class="row">
+        ${w.theory?`<button class="btn ghost" onclick="showTheory('${w.id}')">📖 Teoria</button>`:''}
+        <button class="btn" ${locked?'disabled':''} onclick="startRound('${w.id}')" style="background:${w.color}">▶ Jugar</button>
+      </div>
+    </div>`;
+  app.innerHTML = `
+    <h1>Hola, ${esc(S.name)}! 👋</h1>
+    <p class="sub">Supera els 4 mons, aconsegueix estrelles i desbloqueja el <b>Repte final</b>. Si et quedes encallat/ada, demana una <b>💡 pista</b> (et costa una mica de punts, però t'ajuda a aprendre!).</p>
+    <div class="rank">
+      <div class="big">${r[1]}</div>
+      <div style="flex:1;min-width:200px">
+        <div><b>${r[2]}</b> · ${S.xp} XP</div>
+        <div class="xpbar"><div style="width:${pct}%"></div></div>
+        <div class="help">${next?`Et falten ${next[0]-S.xp} XP per ser <b>${next[2]}</b> ${next[1]}`:'Has arribat al rang màxim! 🎉'}</div>
+      </div>
+    </div>
+    <div class="grid">${WORLDS.map(w=>card(w,false)).join('')}${card(FINAL,!finalUnlocked())}</div>
+    <div class="actions" style="justify-content:flex-end"><button class="btn ghost" onclick="resetAll()">🔄 Reiniciar puntuacions</button></div>
+    <h2>📺 Abans de jugar…</h2>
+    <p class="sub">Mira't els vídeos del SuperCampus de 2n d'ESO (3Cat) sobre <b>forces elèctriques</b>, <b>càlcul de la càrrega elèctrica</b>, <b>energia nuclear</b> i <b>factors de conversió</b>. Després, consulta la 📖 Teoria de cada món i a jugar!</p>`;
+}
+function esc(s){ return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+function askName(){
+  app.innerHTML = `<div class="card center" style="max-width:480px;margin:40px auto">
+    <div style="font-size:3rem">🧪⚡☢️</div>
+    <h1>Benvingut/da a Missió Ciència!</h1>
+    <p class="sub">Un joc per practicar la càrrega elèctrica, les forces elèctriques, l'energia nuclear i els factors de conversió de 2n d'ESO.</p>
+    <p>Com et dius, científic/a?</p>
+    <div class="numrow" style="justify-content:center"><input id="nm" maxlength="20" placeholder="El teu nom"><button class="btn" onclick="setName()">Comencem! 🚀</button></div>
+  </div>`;
+  const i=document.getElementById('nm'); i.focus(); i.onkeydown=e=>{ if(e.key==='Enter') setName(); };
+}
+function setName(){ const v=document.getElementById('nm').value.trim(); if(!v) return; S.name=v; save(); goHome(); }
+function resetAll(){
+  document.getElementById('modal').innerHTML = `<div class="modal" onclick="if(event.target===this)closeModal()"><div class="box center" style="max-width:560px">
+    <div style="font-size:3rem">🔄</div>
+    <h2>Reiniciar les puntuacions?</h2>
+    <p>S'esborraran <b>totes les estrelles, els XP, el rang i els rècords</b>. El nom i la mida de la lletra es mantenen.</p>
+    <p>Aquesta acció <b>no es pot desfer</b>.</p>
+    <div class="actions" style="justify-content:center">
+      <button class="btn ghost" onclick="closeModal()">No, tornar enrere</button>
+      <button class="btn" style="background:var(--bad)" onclick="doReset()">Sí, reiniciar</button>
+    </div></div></div>`;
+}
+function doReset(){ const n=S.name; S={name:n,xp:0,stars:{},best:{},sound:S.sound,fs:S.fs,played:0}; save(); goHome(); }
+
+/* ---------- Teoria ---------- */
+function showTheory(id){
+  const w=WORLDS.find(x=>x.id===id);
+  document.getElementById('modal').innerHTML = `<div class="modal" onclick="if(event.target===this)closeModal()"><div class="box theory">
+    ${w.theory}
+    <div class="actions"><button class="btn" style="background:${w.color}" onclick="startRound('${id}')">▶ Ja ho tinc, a jugar!</button><button class="btn ghost" onclick="closeModal()">Tancar</button></div>
+  </div></div>`;
+  if(id==='forces') initSim();
+}
+function closeModal(){ document.getElementById('modal').innerHTML=''; }
+
+function initSim(){
+  let s1=1, s2=-1;
+  const svg=document.getElementById('simsvg'), sl=document.getElementById('simd');
+  const b1=document.getElementById('b1'), b2=document.getElementById('b2');
+  function draw(){
+    const d=+sl.value/10, F=K*2e-6*2e-6/(d*d), attract=s1*s2<0;
+    const cx=170, half=34+(d-0.1)/0.4*100, x1=cx-half, x2=cx+half, y=85;
+    let len=12+F/3.6*70; if(attract) len=Math.min(len, half-8);
+    const col=s=>s>0?'var(--pos)':'var(--neg)';
+    const dir1 = attract?1:-1;
+    svg.innerHTML = `<defs><marker id="ar" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#facc15"/></marker></defs>
+      <line x1="${x1}" y1="${y}" x2="${x2}" y2="${y}" stroke="#2c3a66" stroke-dasharray="4 4"/>
+      <line x1="${x1}" y1="34" x2="${x1+dir1*len}" y2="34" stroke="#facc15" stroke-width="4" marker-end="url(#ar)"/>
+      <line x1="${x2}" y1="34" x2="${x2-dir1*len}" y2="34" stroke="#facc15" stroke-width="4" marker-end="url(#ar)"/>
+      <circle cx="${x1}" cy="${y}" r="20" fill="${col(s1)}"/><text x="${x1}" y="${y+8}" text-anchor="middle" font-size="24" font-weight="700" fill="#fff">${s1>0?'+':'−'}</text>
+      <circle cx="${x2}" cy="${y}" r="20" fill="${col(s2)}"/><text x="${x2}" y="${y+8}" text-anchor="middle" font-size="24" font-weight="700" fill="#fff">${s2>0?'+':'−'}</text>`;
+    document.getElementById('simdt').textContent = `${dec(d*100)} cm = ${dec(d)} m`;
+    document.getElementById('simf').innerHTML = `F = ${fmt(F)} N → <b>${attract?'S\'atrauen 🤝':'Es repel·leixen 💥'}</b>`;
+    b1.textContent=`Càrrega 1: ${s1>0?'+':'−'}`; b2.textContent=`Càrrega 2: ${s2>0?'+':'−'}`;
+  }
+  b1.onclick=()=>{s1=-s1;draw();}; b2.onclick=()=>{s2=-s2;draw();}; sl.oninput=draw; draw();
+}
+
+/* ---------- Partida ---------- */
+let R=null;
+function prepMC(q){ return {type:'mc', tag:'❓ Test', text:q.q, options:shuffle(q.o), answer:q.o[0], hints:q.h, explain:q.e}; }
+function makeQs(id){
+  if(id==='final'){
+    const qs=[];
+    WORLDS.forEach(w=>{ shuffle(w.mc).slice(0,1).forEach(q=>qs.push(prepMC(q))); });
+    qs.push(GEN_CARREGA[0](), GEN_CARREGA[1](), GEN_FORCES[0](), GEN_NUCLEAR[rnd([0,2])](), genBuild(BUILD[rnd([0,1])]), genBuild());
+    return shuffle(qs);
+  }
+  const w=WORLDS.find(x=>x.id===id);
+  const mcs=shuffle(w.mc).slice(0,w.nMC).map(prepMC);
+  const gens=[]; const order=shuffle(w.gens);
+  for(let i=0;i<w.nGen;i++) gens.push(order[i%order.length]());
+  return shuffle([...mcs,...gens]);
+}
+function startRound(id){
+  closeModal();
+  const w = id==='final'?FINAL:WORLDS.find(x=>x.id===id);
+  R={id, w, qs:makeQs(id), i:0, lives:5, score:0, base:0, streak:0, bestStreak:0, correct:0, hintsTotal:0};
+  R.qs.forEach(q=>{ q.hintsUsed=0; q.attempts=0; q.done=false; });
+  renderQ(); window.scrollTo(0,0);
+}
+function renderQ(){
+  const q=R.qs[R.i], n=R.qs.length;
+  let body='';
+  if(q.type==='mc'){
+    body = `<div class="opts">${q.options.map((o,i)=>`<button class="opt" data-i="${i}" onclick="pickMC(${i})">${o}</button>`).join('')}</div>`;
+  } else if(q.type==='num'){
+    body = numInput(q);
+  } else {
+    body = `<div class="chain" id="chain"></div><div class="unitstat" id="ustat"></div>
+      <div class="help">Factors disponibles (clica per afegir-los; clica'ls a la cadena per treure'ls):</div>
+      <div class="pool" id="pool"></div>
+      <div id="bAns" style="display:none;margin-top:14px">${numInput(q)}</div>`;
+  }
+  app.innerHTML = `
+    <div class="qtop">
+      <div><b style="color:${R.w.color}">${R.w.icon} ${R.w.name}</b> · Pregunta ${R.i+1}/${n}</div>
+      <div class="hearts" title="Vides">${'❤️'.repeat(R.lives)}${'🖤'.repeat(Math.max(0,5-R.lives))}</div>
+      <div><span class="pill">⭐ ${R.score}</span> ${R.streak>=2?`<span class="pill">🔥 Ratxa ${R.streak}</span>`:''}</div>
+    </div>
+    <div class="progress"><div style="width:${R.i/n*100}%;background:${R.w.color}"></div></div>
+    <div class="card" id="qcard">
+      <span class="tag">${q.tag||''}</span>
+      <div class="qtext">${q.text}</div>
+      ${body}
+      <div class="hintbox" id="hints">${q.hints.slice(0,q.hintsUsed).map((h,i)=>`<div class="hint">💡 <b>Pista ${i+1}:</b> ${h}</div>`).join('')}</div>
+      <div class="actions" id="acts"></div>
+      <div class="fb" id="fb"></div>
+    </div>
+    <div class="actions"><button class="btn ghost" onclick="if(confirm('Vols sortir? Perdràs aquesta partida.'))goHome()">🏠 Sortir</button></div>`;
+  renderActs();
+  if(q.type==='build') renderBuild();
+  const inp=document.getElementById('ans'); if(inp && q.type==='num') inp.focus();
+}
+function numInput(q){
+  return `<div class="numrow"><input id="ans" autocomplete="off" placeholder="La teva resposta" onkeydown="if(event.key==='Enter')submitNum()"><b>${q.unit||''}</b>
+    <button class="btn" onclick="submitNum()">Comprovar</button></div>
+    <div class="help">Fes servir la coma per als decimals. Per a potències de 10 pots escriure <b>1,6e-19</b> o <b>1,6·10^-19</b>.</div>`;
+}
+function renderActs(){
+  const q=R.qs[R.i], left=q.hints.length-q.hintsUsed, a=document.getElementById('acts');
+  if(q.done){
+    const last=R.i>=R.qs.length-1 || R.lives<=0;
+    a.innerHTML = `<button class="btn ok" id="nextb" onclick="nextQ()">${last?'🏁 Veure resultats':'Següent ➜'}</button>`;
+    setTimeout(()=>{ const b=document.getElementById('nextb'); if(b) b.focus(); },50);
+  } else {
+    a.innerHTML = `<button class="btn gold" ${left?'':'disabled'} onclick="useHint()">💡 Pista ${left?`(${left} ${left===1?'queda':'queden'}, −25 punts)`:'(no en queden)'}</button>`;
+  }
+}
+function useHint(){
+  const q=R.qs[R.i]; if(q.done || q.hintsUsed>=q.hints.length) return;
+  q.hintsUsed++; R.hintsTotal++; beep('hint');
+  const h=document.getElementById('hints');
+  h.insertAdjacentHTML('beforeend', `<div class="hint">💡 <b>Pista ${q.hintsUsed}:</b> ${q.hints[q.hintsUsed-1]}</div>`);
+  renderActs();
+}
+function pickMC(i){
+  const q=R.qs[R.i]; if(q.done) return;
+  const btn=document.querySelector(`.opt[data-i="${i}"]`);
+  const ok = q.options[i]===q.answer;
+  if(ok){ btn.classList.add('right'); }
+  else { btn.classList.add('wrong'); btn.disabled=true; }
+  result(ok);
+  if(q.done) document.querySelectorAll('.opt').forEach(b=>{ b.disabled=true; if(q.options[+b.dataset.i]===q.answer) b.classList.add('right'); });
+}
+function submitNum(){
+  const q=R.qs[R.i]; if(q.done) return;
+  const inp=document.getElementById('ans'); const u=parseNum(inp.value);
+  if(isNaN(u)){ fb('info','🤔 No entenc aquest número','Escriu només el número. Exemples: <b>20</b>, <b>0,25</b>, <b>3,2e-6</b> o <b>3,2·10^-6</b>.'); return; }
+  const a=q.answer, tol=Math.abs(a)*0.025+1e-300;
+  let ok=false, msg='';
+  if(Math.abs(u-a)<=tol) ok=true;
+  else if(Math.abs(Math.abs(u)-Math.abs(a))<=tol){ if(q.signMatters) msg='El número és correcte, però <b>compte amb el signe</b>! Ha guanyat o perdut electrons?'; else ok=true; }
+  else if(u!==0){ const l=Math.log10(Math.abs(u)/Math.abs(a)); if(Math.abs(l-Math.round(l))<0.012) msg=`Les xifres són bones, però la <b>potència de 10</b> no (t'has desviat ${Math.abs(Math.round(l))} ${Math.abs(Math.round(l))===1?'zero':'zeros'}). Revisa les unitats i els exponents!`; }
+  result(ok,msg);
+  if(q.done) inp.disabled=true;
+}
+function result(ok,msg){
+  const q=R.qs[R.i];
+  if(ok){
+    q.done=true;
+    const base=Math.max(10, 100-25*q.hintsUsed-(q.attempts?40:0));
+    R.streak++; R.bestStreak=Math.max(R.bestStreak,R.streak);
+    const bonus=R.streak>=2?Math.min(50,(R.streak-1)*10):0;
+    R.base+=base; R.score+=base+bonus; R.correct++;
+    beep('ok');
+    fb('ok', `✅ Correcte! +${base}${bonus?` (+${bonus} per la ratxa 🔥)`:''}`, q.explain);
+  } else {
+    R.lives--; R.streak=0; beep('bad');
+    document.getElementById('qcard').classList.remove('shake'); void document.getElementById('qcard').offsetWidth; document.getElementById('qcard').classList.add('shake');
+    if(q.attempts===0 && R.lives>0){
+      q.attempts=1;
+      fb('bad','❌ No és correcte… torna-ho a provar!', (msg?msg+'<br>':'')+(q.hintsUsed<q.hints.length?'Si vols, demana una 💡 pista.':'Rellegeix les pistes amb calma.'));
+    } else {
+      q.done=true;
+      const sol = q.type==='mc' ? `La resposta correcta era: <b>${q.answer}</b>.` : `La resposta correcta era: <b>${fmt(q.answer)} ${q.unit||''}</b>.`;
+      fb('bad', R.lives<=0?'💔 T\'has quedat sense vides!':'❌ Aquesta vegada no ha pogut ser', `${msg?msg+'<br>':''}${sol}<br>${q.explain}`);
+    }
+  }
+  updateTop(); renderActs();
+}
+function updateTop(){
+  const h=document.querySelector('.hearts'); if(h) h.textContent='❤️'.repeat(Math.max(0,R.lives))+'🖤'.repeat(Math.max(0,5-R.lives));
+  const t=document.querySelector('.qtop>div:last-child'); if(t) t.innerHTML=`<span class="pill">⭐ ${R.score}</span> ${R.streak>=2?`<span class="pill">🔥 Ratxa ${R.streak}</span>`:''}`;
+}
+function fb(kind,title,body){ const f=document.getElementById('fb'); f.className='fb '+kind; f.innerHTML=`<div class="t">${title}</div><div>${body||''}</div>`; }
+function nextQ(){
+  if(R.lives<=0 || R.i>=R.qs.length-1) return endRound();
+  R.i++; renderQ(); window.scrollTo(0,0);
+}
+
+/* ---------- Constructor ---------- */
+function unitsOf(q){
+  const u={...q.start.units};
+  q.chain.forEach(t=>{ u[t.tu]=(u[t.tu]||0)+1; u[t.bu]=(u[t.bu]||0)-1; });
+  Object.keys(u).forEach(k=>{ if(!u[k]) delete u[k]; });
+  return u;
+}
+function uLabel(u){
+  const ex=(k,e)=>k+(Math.abs(e)>1?sup(Math.abs(e)):'');
+  const num=Object.keys(u).filter(k=>u[k]>0).map(k=>ex(k,u[k])), den=Object.keys(u).filter(k=>u[k]<0).map(k=>ex(k,u[k]));
+  return (num.join('·')||'1')+(den.length?'/'+den.join('·'):'');
+}
+const sameU=(a,b)=>{ const ka=Object.keys(a), kb=Object.keys(b); return ka.length===kb.length && ka.every(k=>a[k]===b[k]); };
+function renderBuild(){
+  const q=R.qs[R.i], fin=unitsOf(q);
+  const cut=(unit,sign)=>{ const f=fin[unit]||0; return (f===0 || Math.sign(f)!==sign) ? `<span class="cut">${unit}</span>` : unit; };
+  const su=q.start.units, num=Object.keys(su).filter(k=>su[k]>0), den=Object.keys(su).filter(k=>su[k]<0);
+  const startHtml = den.length
+    ? `<span class="frac start"><span>${dec(q.start.v)} ${num.map(u=>cut(u,1)).join('·')}</span><span>1 ${den.map(u=>cut(u,-1)).join('·')}</span></span>`
+    : `<span class="frac start" style="justify-content:center;min-height:52px"><span style="border:0">${dec(q.start.v)} ${num.map(u=>cut(u,1)).join('·')}</span></span>`;
+  const tile=(t,where)=>`<button class="frac" ${q.done?'disabled':''} onclick="${where}(${t.id})" title="${where==='addT'?'Afegir':'Treure'}"><span>${fmtT(t.tv)} ${where==='remT'?cut(t.tu,1):t.tu}</span><span>${fmtT(t.bv)} ${where==='remT'?cut(t.bu,-1):t.bu}</span></button>`;
+  document.getElementById('chain').innerHTML = startHtml + q.chain.map(t=>`<span class="x">·</span>`+tile(t,'remT')).join('');
+  document.getElementById('pool').innerHTML = q.pool.filter(t=>!q.chain.includes(t)).map(t=>tile(t,'addT')).join('') || '<span class="help">No queden factors.</span>';
+  const ok=sameU(fin,q.target);
+  document.getElementById('ustat').innerHTML = `Unitats ara: <b>${uLabel(fin)}</b> &nbsp;→&nbsp; objectiu: <b>${q.tl}</b> ${ok?'✅ Perfecte! Ara calcula el resultat.':(q.chain.length?'⏳ Encara no…':'')}`;
+  const b=document.getElementById('bAns');
+  const wasHidden = b.style.display==='none';
+  b.style.display = ok?'block':'none';
+  if(ok && wasHidden && !q.done){ const i=document.getElementById('ans'); if(i) i.focus(); }
+}
+function addT(id){ const q=R.qs[R.i]; if(q.done) return; q.chain.push(q.pool.find(t=>t.id===id)); beep('hint'); renderBuild(); }
+function remT(id){ const q=R.qs[R.i]; if(q.done) return; q.chain=q.chain.filter(t=>t.id!==id); renderBuild(); }
+
+/* ---------- Final de ronda ---------- */
+function endRound(){
+  const n=R.qs.length, pct=R.base/(n*100), over=R.lives<=0;
+  const stars = over?0: pct>=0.85?3: pct>=0.65?2: pct>=0.4?1:0;
+  const prevRank=rankOf(S.xp);
+  S.xp+=R.score; S.played++;
+  const id=R.id; const newBest = R.score>(S.best[id]||0);
+  S.stars[id]=Math.max(S.stars[id]||0,stars); if(newBest) S.best[id]=R.score;
+  save(); hdr();
+  const nr=rankOf(S.xp), up=nr>prevRank;
+  const msgs = over ? ['No passa res! Equivocar-se és part d\'aprendre. Repassa la 📖 Teoria i torna-ho a provar 💪']
+    : stars===3 ? ['Increïble! Ets un crack de la ciència! 🤩','Perfecte! Einstein estaria orgullós! 🧠']
+    : stars===2 ? ['Molt bé! Una mica més i aconsegueixes les 3 estrelles!']
+    : stars===1 ? ['Bé! Ja tens una estrella. Prova de demanar menys pistes per aconseguir-ne més.']
+    : ['Encara ho pots fer millor. Repassa la teoria i torna-hi!'];
+  app.innerHTML = `<div class="card center" style="margin-top:20px">
+    <div style="font-size:3rem">${over?'💔':R.w.icon}</div>
+    <h1>${over?'Partida acabada':'Missió completada!'}</h1>
+    <div class="bigstars" style="color:${R.w.color}">${starStr(stars)}</div>
+    <p>${rnd(msgs)}</p>
+    <p>Encerts: <b>${R.correct}/${n}</b> · Punts: <b>${R.score}</b> ${newBest?'🏅 <b>Nou rècord!</b>':''}<br>Millor ratxa: <b>${R.bestStreak}</b> 🔥 · Pistes fetes servir: <b>${R.hintsTotal}</b></p>
+    ${up?`<div class="fb ok" style="display:block">🎉 <b>Has pujat de rang!</b> Ara ets <b>${RANKS[nr][2]}</b> ${RANKS[nr][1]}</div>`:''}
+    ${(!over && id!=='final' && finalUnlocked() && stars>=1)?`<p>🏆 El <b>Repte final</b> està desbloquejat!</p>`:''}
+    <div class="actions" style="justify-content:center">
+      <button class="btn" style="background:${R.w.color}" onclick="startRound('${id}')">🔄 Tornar a jugar</button>
+      <button class="btn ghost" onclick="goHome()">🗺️ Tornar al mapa</button>
+    </div></div>`;
+  if(stars===3 || up){ beep('win'); confetti(); }
+}
+function confetti(){
+  const em=['⚡','⭐','🧲','☢️','🎉','✨'];
+  for(let i=0;i<40;i++){ const s=document.createElement('div'); s.className='confetti'; s.textContent=rnd(em);
+    s.style.left=Math.random()*100+'vw'; s.style.animationDuration=(2+Math.random()*2.5)+'s'; s.style.animationDelay=Math.random()*0.8+'s';
+    document.body.appendChild(s); setTimeout(()=>s.remove(),5200); }
+}
+
+hdr(); goHome();
+</script>
+</body>
+</html>
